@@ -653,8 +653,162 @@ function startAutoRefresh(){
 }
 startAutoRefresh();
 
+/* ================= User Management ================= */
+let users = [];
+
+async function loadUsers() {
+  try {
+    const res = await fetch('/api/admin/users', { headers: authHeaders() });
+    if (!res.ok) throw new Error('Impossible de charger les utilisateurs');
+    users = await res.json();
+    renderUsers();
+  } catch (e) {
+    toast('Erreur chargement utilisateurs: ' + e.message, 'err');
+  }
+}
+
+function renderUsers() {
+  const tbody = document.getElementById('users-tbody');
+  tbody.innerHTML = '';
+  users.forEach(u => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td data-label="Nom">${escapeHtml(u.name)}</td>
+      <td data-label="Nom d'utilisateur">${escapeHtml(u.username)}</td>
+      <td data-label="Rôle"><span class="tag">${escapeHtml(u.role)}</span></td>
+      <td data-label="Créé le">${new Date(u.created_at).toLocaleDateString('fr-FR')}</td>
+      <td class="actions">
+        <button title="Éditer" onclick="openUserModal('${u.id}')"><i class="fas fa-edit"></i></button>
+        <button title="Supprimer" onclick="deleteUser('${u.id}')"><i class="fas fa-trash" style="color:var(--danger)"></i></button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function openUserModal(id = null) {
+  const form = document.getElementById('userForm');
+  form.reset();
+  document.getElementById('userId').value = '';
+  const passLabel = document.getElementById('u_password_label');
+  const passInput = document.getElementById('u_password');
+
+  if (id) {
+    const user = users.find(u => String(u.id) === String(id));
+    if (!user) return toast('Utilisateur introuvable', 'err');
+    document.getElementById('userModalTitle').textContent = 'Modifier un utilisateur';
+    document.getElementById('userId').value = user.id;
+    document.getElementById('u_name').value = user.name;
+    document.getElementById('u_username').value = user.username;
+    document.getElementById('u_role').value = user.role;
+    passLabel.textContent = 'Nouveau mot de passe';
+    passInput.placeholder = 'Laissez vide pour ne pas changer';
+    passInput.required = false;
+  } else {
+    document.getElementById('userModalTitle').textContent = 'Ajouter un utilisateur';
+    passLabel.textContent = 'Mot de passe';
+    passInput.placeholder = 'Mot de passe';
+    passInput.required = true;
+  }
+  document.getElementById('modalUser').style.display = 'flex';
+}
+
+function closeUserModal() {
+  document.getElementById('modalUser').style.display = 'none';
+}
+
+async function saveUser(e) {
+  e.preventDefault();
+  const id = document.getElementById('userId').value;
+  const data = {
+    name: document.getElementById('u_name').value.trim(),
+    username: document.getElementById('u_username').value.trim(),
+    role: document.getElementById('u_role').value,
+  };
+  const password = document.getElementById('u_password').value;
+  if (password) {
+    data.password = password;
+  }
+
+  const url = id ? `/api/admin/users/${id}` : '/api/admin/users';
+  const method = id ? 'PUT' : 'POST';
+
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: authHeaders(),
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Erreur sauvegarde');
+    }
+    toast('Utilisateur enregistré');
+    closeUserModal();
+    await loadUsers();
+  } catch (err) {
+    toast('Erreur: ' + err.message, 'err');
+  }
+}
+
+async function deleteUser(id) {
+  if (String(id) === JSON.parse(localStorage.getItem('user') || '{}').id) {
+    return toast('Vous ne pouvez pas supprimer votre propre compte', 'warn');
+  }
+  if (!confirm('Supprimer cet utilisateur ? Cette action est irréversible.')) return;
+
+  try {
+    const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE', headers: authHeaders() });
+    if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Erreur suppression');
+    }
+    toast('Utilisateur supprimé');
+    await loadUsers();
+  } catch (e) {
+    toast('Erreur suppression: ' + e.message, 'err');
+  }
+}
+
+
+/* ================= Tab Handling ================= */
+function setupTabs() {
+  const tabLinks = document.querySelectorAll('.tab-link');
+  const tabContents = document.querySelectorAll('.tab-content');
+
+  tabLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      const tab = link.dataset.tab;
+
+      tabLinks.forEach(l => l.classList.remove('active'));
+      link.classList.add('active');
+
+      tabContents.forEach(c => c.classList.remove('active'));
+      document.getElementById(`${tab}-view`).classList.add('active');
+
+      document.getElementById('page-subtitle').textContent = tab === 'articles' ? 'Gestion des Articles & Prix' : 'Gestion des Utilisateurs';
+    });
+  });
+}
+
+
 /* ================= On load ================= */
 (async function init(){
+  setupTabs();
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  if (user.name) {
+    document.getElementById('username-display').textContent = `Bonjour, ${user.name}`;
+  }
+  document.getElementById('logout-button').addEventListener('click', () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = 'login.html';
+  });
+
+  document.getElementById('userForm').addEventListener('submit', saveUser);
+  document.getElementById('btnAddUser').addEventListener('click', () => openUserModal());
+
   await loadArticles();
+  await loadUsers();
   applyFiltersSortSearch();
 })();

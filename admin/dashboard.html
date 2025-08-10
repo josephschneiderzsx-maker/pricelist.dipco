@@ -25,80 +25,114 @@
         <img src="https://dipco.itxpress.net/dipco_logo.png" alt="logo">
         <div>
           <div style="font-weight:700;font-size:22px;color:var(--text-primary)">DIPCO Dashboard Admin</div>
-          <div class="muted">Gestion des Articles & Prix</div>
+          <div class="muted" id="page-subtitle">Gestion des Articles & Prix</div>
         </div>
       </div>
-      <div class="muted">Auto-refresh: <span id="autoRefreshTxt">5min</span></div>
+      <div class="user-info">
+        <span id="username-display"></span>
+        <button id="logout-button" class="btn btn-secondary btn-sm">Déconnexion</button>
+      </div>
     </header>
 
-    <!-- Stats + controls -->
-    <section class="card">
-      <div class="stats">
-        <div class="stat">
-          <div class="label">Articles</div>
-          <div class="value" id="statCount">0</div>
-        </div>
-        <div class="stat">
-          <div class="label">Prix moyen ($)</div>
-          <div class="value" id="statAvg">-</div>
-        </div>
-        <div class="stat">
-          <div class="label">Total valeur ($)</div>
-          <div class="value" id="statTotal">-</div>
-        </div>
-        <div class="stat">
-          <div class="label">Valeur moyenne ($)</div>
-          <div class="value" id="statValueAvg">-</div>
-        </div>
-      </div>
+    <div class="tabs">
+      <button class="tab-link active" data-tab="articles">Articles</button>
+      <button class="tab-link" data-tab="users">Utilisateurs</button>
+    </div>
 
-      <div class="controls">
-        <div class="search">
-          <i class="fas fa-search"></i>
-          <input id="searchInput" placeholder="Recherche par code, description, type, demar..." />
-        </div>
-
-        <div class="filters">
-          <select id="filterType" class="select">
-            <option value="">Filtrer par Type</option>
-          </select>
-          <select id="filterDemar" class="select">
-            <option value="">Filtrer par Démarque</option>
-          </select>
-
-          <div style="display:flex;gap:12px;align-items:center;">
-            <button id="btnAdd" class="btn btn-secondary"><i class="fas fa-plus"></i> Ajouter</button>
-            <button id="btnBatch" class="btn btn-excel"><i class="fas fa-layer-group"></i> Ajout en lot</button>
-            <button id="btnExport" class="btn btn-secondary"><i class="fas fa-file-export"></i> Export</button>
-            <button id="btnRefresh" class="btn btn-secondary" title="Forcer refresh"><i class="fas fa-sync-alt"></i></button>
+    <div id="articles-view" class="tab-content active">
+      <!-- Stats + controls -->
+      <section class="card">
+        <div class="stats">
+          <div class="stat">
+            <div class="label">Articles</div>
+            <div class="value" id="statCount">0</div>
+          </div>
+          <div class="stat">
+            <div class="label">Prix moyen ($)</div>
+            <div class="value" id="statAvg">-</div>
+          </div>
+          <div class="stat">
+            <div class="label">Total valeur ($)</div>
+            <div class="value" id="statTotal">-</div>
+          </div>
+          <div class="stat">
+            <div class="label">Valeur moyenne ($)</div>
+            <div class="value" id="statValueAvg">-</div>
           </div>
         </div>
-      </div>
-    </section>
 
-    <!-- Table -->
-    <section class="card">
-      <div class="table-wrap">
-        <table id="articlesTable">
-          <thead>
-            <tr>
-              <th data-key="code" class="sortable">Code <i class="fas fa-sort"></i></th>
-              <th data-key="description" class="sortable">Description <i class="fas fa-sort"></i></th>
-              <th data-key="demar" class="sortable">Demar <i class="fas fa-sort"></i></th>
-              <th data-key="prix_vente" class="sortable">Prix ($) <i class="fas fa-sort"></i></th>
-              <th data-key="achat_minimum" class="sortable">Achat <i class="fas fa-sort"></i></th>
-              <th>Valeur ($)</th>
-              <th data-key="unite" class="sortable">Unité <i class="fas fa-sort"></i></th>
-              <th data-key="type" class="sortable">Type <i class="fas fa-sort"></i></th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="tbody">
-            <!-- Rempli par JS -->
-          </tbody>
-        </table>
-      </div>
-    </section>
+        <div class="controls">
+          <div class="search">
+            <i class="fas fa-search"></i>
+            <input id="searchInput" placeholder="Recherche par code, description, type, demar..." />
+          </div>
+
+          <div class="filters">
+            <select id="filterType" class="select">
+              <option value="">Filtrer par Type</option>
+            </select>
+            <select id="filterDemar" class="select">
+              <option value="">Filtrer par Démarque</option>
+            </select>
+
+            <div style="display:flex;gap:12px;align-items:center;">
+              <button id="btnAdd" class="btn btn-secondary"><i class="fas fa-plus"></i> Ajouter</button>
+              <button id="btnBatch" class="btn btn-excel"><i class="fas fa-layer-group"></i> Ajout en lot</button>
+              <button id="btnExport" class="btn btn-secondary"><i class="fas fa-file-export"></i> Export</button>
+              <button id="btnRefresh" class="btn btn-secondary" title="Forcer refresh"><i class="fas fa-sync-alt"></i></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Table -->
+      <section class="card">
+        <div class="table-wrap">
+          <table id="articlesTable">
+            <thead>
+              <tr>
+                <th data-key="code" class="sortable">Code <i class="fas fa-sort"></i></th>
+                <th data-key="description" class="sortable">Description <i class="fas fa-sort"></i></th>
+                <th data-key="demar" class="sortable">Demar <i class="fas fa-sort"></i></th>
+                <th data-key="prix_vente" class="sortable">Prix ($) <i class="fas fa-sort"></i></th>
+                <th data-key="achat_minimum" class="sortable">Achat <i class="fas fa-sort"></i></th>
+                <th>Valeur ($)</th>
+                <th data-key="unite" class="sortable">Unité <i class="fas fa-sort"></i></th>
+                <th data-key="type" class="sortable">Type <i class="fas fa-sort"></i></th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tbody">
+              <!-- Rempli par JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <div id="users-view" class="tab-content">
+      <section class="card">
+        <div class="controls">
+            <button id="btnAddUser" class="btn btn-secondary"><i class="fas fa-plus"></i> Ajouter un utilisateur</button>
+        </div>
+        <div class="table-wrap">
+          <table id="usersTable">
+            <thead>
+              <tr>
+                <th>Nom</th>
+                <th>Nom d'utilisateur</th>
+                <th>Rôle</th>
+                <th>Créé le</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="users-tbody">
+              <!-- Rempli par JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
   </div>
 
   <!-- Modal ARTICLE (Add / Edit) -->
@@ -149,6 +183,47 @@
 
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" onclick="closeArticleModal()">Annuler</button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal USER (Add / Edit) -->
+  <div id="modalUser" class="modal-backdrop" style="display:none;">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title" id="userModalTitle">Ajouter un utilisateur</div>
+        <button onclick="closeUserModal()" class="btn btn-secondary">Fermer</button>
+      </div>
+
+      <form id="userForm">
+        <input type="hidden" id="userId" />
+        <div class="form-grid">
+          <div class="full">
+            <label>Nom</label>
+            <input id="u_name" type="text" required />
+          </div>
+          <div class="full">
+            <label>Nom d'utilisateur</label>
+            <input id="u_username" type="text" required />
+          </div>
+          <div class="full">
+            <label id="u_password_label">Mot de passe</label>
+            <input id="u_password" type="password" />
+            <div class="muted" style="margin-top:6px">Laissez vide pour ne pas changer.</div>
+          </div>
+          <div class="full">
+            <label>Rôle</label>
+            <select id="u_role" class="select">
+              <option value="user">Utilisateur</option>
+              <option value="admin">Administrateur</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeUserModal()">Annuler</button>
           <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Enregistrer</button>
         </div>
       </form>
