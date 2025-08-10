@@ -155,57 +155,56 @@
     </div>
   </div>
 
-  <!-- Modal BATCH (nouveau design) -->
-  <div id="modalBatch" class="modal-backdrop" style="display:none;">
-    <div class="modal-box">
-      <div class="modal-header">
-        <div class="modal-title">Ajout en lot</div>
-        <button onclick="closeBatchModal()" class="btn btn-secondary">Fermer</button>
+  <!-- Page Plein Écran pour l'Ajout par Lot -->
+  <div id="batch-add-page" style="display:none;">
+    <header class="topbar">
+      <div class="branding">
+        <div>
+          <div style="font-weight:700;font-size:22px;color:var(--text-primary)">Ajout en Lot</div>
+          <div class="muted">Ajoutez ou modifiez plusieurs articles simultanément</div>
+        </div>
+      </div>
+      <button id="btnBackToDashboard" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Retour</button>
+    </header>
+
+    <div class="card">
+      <div class="batch-table-container">
+        <table class="batch-table">
+          <thead>
+            <tr>
+              <th class="required">CODE</th>
+              <th class="required">DESCRIPTION</th>
+              <th>DEMAR</th>
+              <th>PRIX ($)</th>
+              <th>ACHAT MIN.</th>
+              <th>UNITÉ</th>
+              <th>TYPE</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody id="batch-items-table">
+            <!-- Rempli dynamiquement -->
+          </tbody>
+        </table>
       </div>
 
-      <div>
-        <h3 style="font-size: 18px; margin-bottom: 16px;">Édition en lot</h3>
-        <p class="muted" style="margin-bottom: 20px;">Ajoutez ou modifiez plusieurs articles simultanément</p>
-        
-        <div class="batch-table-container">
-          <table class="batch-table">
-            <thead>
-              <tr>
-                <th class="required">CODE</th>
-                <th class="required">DESCRIPTION</th>
-                <th>DEMAR</th>
-                <th>PRIX ($)</th>
-                <th>ACHAT MIN.</th>
-                <th>UNITÉ</th>
-                <th>TYPE</th>
-                <th>ACTIONS</th>
-              </tr>
-            </thead>
-            <tbody id="batch-items-table">
-              <!-- Rempli dynamiquement -->
-            </tbody>
-          </table>
+      <div class="batch-footer">
+        <div class="batch-add-row" id="batch-add-row">
+          <i class="fas fa-plus-circle"></i>
+          <span>Ajouter ligne</span>
         </div>
-        
-        <div class="batch-footer">
-          <div class="batch-add-row" id="batch-add-row">
-            <i class="fas fa-plus-circle"></i>
-            <span>Ajouter ligne</span>
-          </div>
-          <div class="batch-save">
-          <!--  <div class="kbd">Entrée</div> -->
-            <button class="btn btn-excel" id="batch-save-all">
-              <i class="fas fa-save"></i> Enregistrer tout
-            </button>
-          </div>
+        <div class="batch-save">
+          <button class="btn btn-excel" id="batch-save-all">
+            <i class="fas fa-save"></i> Enregistrer tout
+          </button>
         </div>
-        
-        <div class="batch-info">
-          <i class="fas fa-info-circle" style="color: var(--accent); font-size: 24px;"></i>
-          <div>
-            <h4 style="font-weight: 600; margin-bottom: 8px;">Conseils pour l'ajout en lot</h4>
-            <p class="muted">Commencez à taper dans les champs pour voir les suggestions basées sur les valeurs existantes. Appuyez sur Entrée pour passer à la cellule suivante.</p>
-          </div>
+      </div>
+
+      <div class="batch-info">
+        <i class="fas fa-info-circle" style="color: var(--accent); font-size: 24px;"></i>
+        <div>
+          <h4 style="font-weight: 600; margin-bottom: 8px;">Conseils pour l'ajout en lot</h4>
+          <p class="muted">Commencez à taper dans les champs pour voir les suggestions basées sur les valeurs existantes. Appuyez sur Entrée pour passer à la cellule suivante.</p>
         </div>
       </div>
     </div>

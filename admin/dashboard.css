@@ -495,6 +495,12 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
   gap: 12px;
 }
 
+@media (max-width: 1200px) {
+  .wrap {
+    max-width: 95%;
+  }
+}
+
 @media (max-width: 992px) {
   .form-grid {
     grid-template-columns: 1fr;
@@ -502,6 +508,16 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
 
   .stats {
     flex-direction: column;
+  }
+
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .search {
@@ -517,4 +533,85 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
   .batch-save {
     align-self: flex-end;
   }
+
+  /* Responsive table: hide header, display rows as cards */
+  table {
+    min-width: unset;
+  }
+
+  thead {
+    display: none;
+  }
+
+  tbody, tr, td {
+    display: block;
+    width: 100%;
+  }
+
+  tr {
+    margin-bottom: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--card-radius);
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+  }
+
+  td {
+    padding: 10px;
+    border: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: right;
+  }
+
+  td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-align: left;
+    margin-right: 15px;
+  }
+
+  td.actions {
+    justify-content: flex-end;
+  }
+  td.actions::before {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+
+  .branding {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+}
+
+/* Full-page batch add */
+#batch-add-page {
+  position: fixed;
+  inset: 0;
+  background-color: var(--bg-light);
+  padding: 20px;
+  z-index: 1100;
+  overflow-y: auto;
+  transition: opacity 0.3s ease-in-out;
+  opacity: 0;
+  pointer-events: none;
+}
+
+#batch-add-page.visible {
+  opacity: 1;
+  pointer-events: auto;
 }
