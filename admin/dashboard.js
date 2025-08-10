@@ -15,6 +15,7 @@ let filtered = [];          // after search/filters/sort
 let sortState = { key: null, dir: 1 }; // dir: 1 asc, -1 desc
 let allUnits = [];          // unités existantes
 let allTypes = [];          // types existants
+let allDemars = [];         // démarques existantes
 
 /* ================= Utils ================= */
 function authHeaders() {
@@ -62,14 +63,14 @@ function renderTable(list = filtered) {
     const valeur = (Number(a.prix_vente) || 0) * (Number(a.achat_minimum) || 0);
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${escapeHtml(a.code)}</td>
-      <td>${escapeHtml(a.description)}</td>
-      <td>${escapeHtml(a.demar || '')}</td>
-      <td>${formatCurrency(a.prix_vente)}</td>
-      <td>${formatCurrency(a.achat_minimum)}</td>
-      <td class="value-cell">${formatCurrency(valeur)}</td>
-      <td>${escapeHtml(a.unite || '')}</td>
-      <td><span class="tag">${escapeHtml(a.type || '')}</span></td>
+      <td data-label="Code">${escapeHtml(a.code)}</td>
+      <td data-label="Description">${escapeHtml(a.description)}</td>
+      <td data-label="Demar">${escapeHtml(a.demar || '')}</td>
+      <td data-label="Prix ($)">${formatCurrency(a.prix_vente)}</td>
+      <td data-label="Achat">${formatCurrency(a.achat_minimum)}</td>
+      <td data-label="Valeur ($)" class="value-cell">${formatCurrency(valeur)}</td>
+      <td data-label="Unité">${escapeHtml(a.unite || '')}</td>
+      <td data-label="Type"><span class="tag">${escapeHtml(a.type || '')}</span></td>
       <td class="actions">
         <button title="Éditer" onclick="openEdit('${a.id}')"><i class="fas fa-edit"></i></button>
         <button title="Supprimer" onclick="deleteArticle('${a.id}')"><i class="fas fa-trash" style="color:var(--danger)"></i></button>
@@ -155,17 +156,20 @@ async function loadArticles(){
     // ensure id present
     articles = articles.map(a => ({ ...a, id: a.id || a._id || a.code }));
 
-    // Extraire les unités et types uniques
+    // Extraire les unités, types, et démarques uniques
     const units = new Set();
     const types = new Set();
+    const demars = new Set();
 
     articles.forEach(item => {
       if (item.unite) units.add(item.unite);
       if (item.type) types.add(item.type);
+      if (item.demar) demars.add(item.demar);
     });
 
     allUnits = Array.from(units);
     allTypes = Array.from(types);
+    allDemars = Array.from(demars);
 
     populateFilterOptions();
     applyFiltersSortSearch();
@@ -254,6 +258,11 @@ function showArticleModal(){
   // Add event listeners for value calculation
   document.getElementById('f_prix_vente').addEventListener('input', calculateValue);
   document.getElementById('f_achat_minimum').addEventListener('input', calculateValue);
+
+  // Setup autocomplete
+  setupAutocomplete(document.getElementById('f_type'), allTypes);
+  setupAutocomplete(document.getElementById('f_unite'), allUnits);
+  setupAutocomplete(document.getElementById('f_demar'), allDemars);
 }
 
 function calculateValue() {
@@ -270,13 +279,23 @@ function closeArticleModal(){
   document.getElementById('f_achat_minimum').removeEventListener('input', calculateValue);
 }
 
-function showBatchModal(){
-  document.getElementById('modalBatch').style.display='flex';
+function showBatchPage() {
+  const page = document.getElementById('batch-add-page');
+  const mainWrap = document.querySelector('.wrap');
+  page.style.display = 'block';
+  mainWrap.style.display = 'none';
+  setTimeout(() => page.classList.add('visible'), 10);
   initBatchTable();
 }
 
-function closeBatchModal(){
-  document.getElementById('modalBatch').style.display='none';
+function hideBatchPage() {
+  const page = document.getElementById('batch-add-page');
+  const mainWrap = document.querySelector('.wrap');
+  page.classList.remove('visible');
+  setTimeout(() => {
+    page.style.display = 'none';
+    mainWrap.style.display = 'block';
+  }, 300); // Wait for transition to finish
 }
 
 /* ================= Form handling ================= */
@@ -361,6 +380,7 @@ function addBatchRow() {
   // Ajouter des suggestions d'autocomplétion
   setupAutocomplete(newRow.querySelector('.batch-unit'), allUnits);
   setupAutocomplete(newRow.querySelector('.batch-type'), allTypes);
+  setupAutocomplete(newRow.querySelector('.batch-demar'), allDemars);
 
   // Navigation au clavier
   setupKeyboardNavigation(newRow);
@@ -512,7 +532,7 @@ async function saveBatchData() {
 
     // Recharger les articles
     await loadArticles();
-    closeBatchModal();
+    hideBatchPage();
   }
 }
 
@@ -591,7 +611,8 @@ function populateFilterOptions(){
 
 /* ================= Events binding ================= */
 document.getElementById('btnAdd').addEventListener('click', openAdd);
-document.getElementById('btnBatch').addEventListener('click', showBatchModal);
+document.getElementById('btnBatch').addEventListener('click', showBatchPage);
+document.getElementById('btnBackToDashboard').addEventListener('click', hideBatchPage);
 document.getElementById('btnExport').addEventListener('click', exportFilteredToExcel);
 document.getElementById('btnRefresh').addEventListener('click', ()=>loadArticles());
 
