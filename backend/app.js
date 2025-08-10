@@ -61,6 +61,84 @@ app.get('/api/public/articles', async (req, res) => {
   }
 });
 
+// Gestion des utilisateurs
+app.get('/api/admin/users', authenticate, isAdmin, async (req, res) => {
+  try {
+    const [users] = await pool.query('SELECT id, name, username, role, created_at FROM users');
+    res.json(users);
+  } catch (err) {
+    console.error('Erreur admin/users:', err);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+app.post('/api/admin/users', authenticate, isAdmin, async (req, res) => {
+  const { name, username, password, role } = req.body;
+  if (!name || !username || !password || !role) {
+    return res.status(400).json({ error: 'Tous les champs sont requis' });
+  }
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const [result] = await pool.execute(
+      'INSERT INTO users (name, username, password, role) VALUES (?, ?, ?, ?)',
+      [name, username, hashedPassword, role]
+    );
+    res.status(201).json({ id: result.insertId, name, username, role });
+  } catch (err) {
+    if (err.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({ error: 'Ce nom d\'utilisateur existe déjà' });
+    }
+    console.error('Erreur création utilisateur:', err);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+app.put('/api/admin/users/:id', authenticate, isAdmin, async (req, res) => {
+  const { id } = req.params;
+  const { name, username, password, role } = req.body;
+
+  try {
+    let query = 'UPDATE users SET name = ?, username = ?, role = ?';
+    const params = [name, username, role];
+
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      query += ', password = ?';
+      params.push(hashedPassword);
+    }
+
+    query += ' WHERE id = ?';
+    params.push(id);
+
+    await pool.execute(query, params);
+    res.json({ message: 'Utilisateur mis à jour' });
+  } catch (err) {
+    if (err.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({ error: 'Ce nom d\'utilisateur existe déjà' });
+    }
+    console.error('Erreur mise à jour utilisateur:', err);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+app.delete('/api/admin/users/:id', authenticate, isAdmin, async (req, res) => {
+  const { id } = req.params;
+
+  // Empêcher la suppression de l'utilisateur admin principal (par exemple, id 1)
+  if (String(id) === '1') {
+    return res.status(403).json({ error: 'Impossible de supprimer l\'administrateur principal' });
+  }
+
+  try {
+    await pool.execute('DELETE FROM users WHERE id = ?', [id]);
+    res.json({ message: 'Utilisateur supprimé' });
+  } catch (err) {
+    console.error('Erreur suppression utilisateur:', err);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
 // Recherche d'articles
 app.get('/api/public/articles/search', async (req, res) => {
   const searchTerm = req.query.q;
