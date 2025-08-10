@@ -111,7 +111,7 @@ app.post('/api/auth/login', loginLimiter, async (req, res) => {
       secure: true,
       sameSite: 'strict',
       maxAge: 15 * 60 * 1000 // 15 minutes
-    }).json({ id: user.id, name: user.name, role: user.role });
+    }).json({ token, user: { id: user.id, name: user.name, role: user.role } });
   } catch (err) {
     console.error('Erreur login:', err);
     res.status(500).json({ error: 'Erreur serveur' });
